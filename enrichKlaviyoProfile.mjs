@@ -15,7 +15,7 @@ const SHOPIFY_HEADERS = {
 
 const ENRICHED_FILE = 'enriched_profiles2.ndjson';
 
-// ✅ Load processed emails from NDJSON instead of processed_profiles.json
+// Load processed emails from NDJSON instead of processed_profiles.json
 function loadProcessedEmailsFromNDJSON(filePath) {
   if (!fs.existsSync(filePath)) return [];
 
@@ -29,7 +29,7 @@ function loadProcessedEmailsFromNDJSON(filePath) {
         emails.add(json.email);
       }
     } catch (err) {
-      console.warn(`⚠️ Skipping invalid NDJSON line: ${line}`);
+      console.warn(`Skipping invalid NDJSON line: ${line}`);
     }
   }
 
@@ -38,12 +38,12 @@ function loadProcessedEmailsFromNDJSON(filePath) {
 
 let processedEmails = loadProcessedEmailsFromNDJSON(ENRICHED_FILE);
 
-// 🚫 No longer needed
+// No longer needed
 function updateProcessedProfiles(email) {
   // no-op, we're tracking via NDJSON now
 }
 
-// 📬 Get Shopify customer by email
+// Get Shopify customer by email
 async function getShopifyCustomerIdByEmail(email) {
   const url = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/customers/search.json?query=email:${encodeURIComponent(email)}&fields=id,email`;
 
@@ -51,7 +51,7 @@ async function getShopifyCustomerIdByEmail(email) {
     const res = await fetch(url, { method: 'GET', headers: SHOPIFY_HEADERS });
 
     if (res.status === 429) {
-      console.warn('🚨 Rate limit reached. Retrying...');
+      console.warn('Rate limit reached. Retrying...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       return await getShopifyCustomerIdByEmail(email);
     }
@@ -61,16 +61,16 @@ async function getShopifyCustomerIdByEmail(email) {
     if (json.customers && json.customers.length > 0) {
       return json.customers[0];
     } else {
-      console.warn(`❌ No customer found for ${email}`);
+      console.warn(`No customer found for ${email}`);
     }
   } catch (error) {
-    console.error(`❌ Error fetching customer for ${email}:`, error);
+    console.error(`Error fetching customer for ${email}:`, error);
   }
 
   return null;
 }
 
-// 📦 Get most recent Shopify order
+// Get most recent Shopify order
 async function getMostRecentOrder(customerId) {
   const url = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/orders.json?customer_id=${customerId}&status=any&limit=1&order=created_at desc`;
 
@@ -89,20 +89,20 @@ async function getMostRecentOrder(customerId) {
       };
     }
   } catch (error) {
-    console.error(`❌ Error fetching most recent order for customer ID ${customerId}:`, error);
+    console.error(`Error fetching most recent order for customer ID ${customerId}:`, error);
   }
 
   return null;
 }
 
-// 💾 Save enriched profile to NDJSON
+// Save enriched profile to NDJSON
 function saveEnrichedProfileIncrementally(profile) {
   const stream = fs.createWriteStream(ENRICHED_FILE, { flags: 'a' });
   stream.write(JSON.stringify(profile) + '\n');
   stream.end();
 }
 
-// 🧠 Enrich profiles
+// Enrich profiles
 async function enrichKlaviyoProfiles(profiles) {
   const enrichedProfiles = [];
   let processedCount = 0;
@@ -156,17 +156,17 @@ async function enrichKlaviyoProfiles(profiles) {
   return enrichedProfiles;
 }
 
-// 🚀 Main
+// Main
 async function main() {
   try {
     const profiles = JSON.parse(fs.readFileSync('klaviyo_profiles.json', 'utf-8'));
-    console.log(`🚀 Starting enrichment of ${profiles.length} Klaviyo profiles...`);
+    console.log(`Starting enrichment of ${profiles.length} Klaviyo profiles...`);
 
     await enrichKlaviyoProfiles(profiles);
 
-    console.log('🎉 Enrichment complete! Profiles saved to enriched_profiles2.ndjson');
+    console.log('Enrichment complete! Profiles saved to enriched_profiles2.ndjson');
   } catch (error) {
-    console.error('❌ Error in main:', error);
+    console.error('Error in main:', error);
   }
 }
 
