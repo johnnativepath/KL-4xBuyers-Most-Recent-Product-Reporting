@@ -19,7 +19,7 @@ async function fetchAllKlaviyoSegmentProfiles(limit = 110000, maxRetries = 3) {
   let cursor = null;
   let page = 1;
 
-  console.log("⏳ Fetching Klaviyo segment profiles (deduping by email)...");
+  console.log("Fetching Klaviyo segment profiles (deduping by email)...");
 
   while (profiles.length < limit) {
     let url = `https://a.klaviyo.com/api/segments/${KLAVIYO_SEGMENT_UUID}/profiles/?page[size]=100`;
@@ -40,13 +40,13 @@ async function fetchAllKlaviyoSegmentProfiles(limit = 110000, maxRetries = 3) {
         break;
       } catch (err) {
         attempt++;
-        console.warn(`⚠️ Retry ${attempt}/${maxRetries} on page ${page}: ${err.message}`);
+        console.warn(`Retry ${attempt}/${maxRetries} on page ${page}: ${err.message}`);
         await new Promise((r) => setTimeout(r, 500 * attempt));
       }
     }
 
     if (!json || !Array.isArray(json.data)) {
-      console.warn(`❌ Failed after ${maxRetries} retries on page ${page}`);
+      console.warn(`Failed after ${maxRetries} retries on page ${page}`);
       break;
     }
 
@@ -64,35 +64,35 @@ async function fetchAllKlaviyoSegmentProfiles(limit = 110000, maxRetries = 3) {
       }
     }
 
-    console.log(`📥 Page ${page++}: Added ${newCount} new → Total unique = ${profiles.length}/${limit}`);
+    console.log(`Page ${page++}: Added ${newCount} new → Total unique = ${profiles.length}/${limit}`);
 
-    // ✅ Incremental write to disk after each page
+    // Incremental write to disk after each page
     try {
       const limited = profiles.slice(0, limit);
       fs.writeFileSync(PROFILE_CACHE_PATH, JSON.stringify(limited, null, 2));
-      console.log(`💾 Incrementally saved ${limited.length} profiles to ${PROFILE_CACHE_PATH}`);
+      console.log(`Incrementally saved ${limited.length} profiles to ${PROFILE_CACHE_PATH}`);
     } catch (err) {
-      console.error("❌ Error during incremental save:", err);
+      console.error("Error during incremental save:", err);
     }
 
-    // ✅ Properly parse next cursor from full URL
+    // Properly parse next cursor from full URL
     if (json.links?.next) {
       try {
         const nextUrl = new URL(json.links.next);
         cursor = nextUrl.searchParams.get("page[cursor]");
       } catch (err) {
-        console.error("❌ Failed to parse next cursor:", err);
+        console.error("Failed to parse next cursor:", err);
         break;
       }
     } else {
-      console.log("🚫 No more pages. Reached end of pagination.");
+      console.log("No more pages. Reached end of pagination.");
       break;
     }
 
     await new Promise((r) => setTimeout(r, 150)); // throttle
   }
 
-  console.log(`✅ Finished fetching. Final total: ${profiles.length} unique profiles`);
+  console.log(`Finished fetching. Final total: ${profiles.length} unique profiles`);
 }
 
 fetchAllKlaviyoSegmentProfiles();
