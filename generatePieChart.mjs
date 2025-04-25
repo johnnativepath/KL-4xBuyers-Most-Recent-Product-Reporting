@@ -30,8 +30,8 @@ function renderProgress(current, done = false) {
   const percent = Math.min((current / ESTIMATED_TOTAL_LINES) * 100, 100);
   const filled = Math.floor((percent / 100) * 40);
   const bar = '█'.repeat(filled) + ' '.repeat(40 - filled);
-  process.stdout.write(`\r📊 Processing NDJSON: [${bar}] ${percent.toFixed(1)}% (${current} lines)`);
-  if (done) console.log('\n✅ Parsing complete.\n');
+  process.stdout.write(`\rProcessing NDJSON: [${bar}] ${percent.toFixed(1)}% (${current} lines)`);
+  if (done) console.log('\nParsing complete.\n');
 }
 
 async function processNDJSON(filePath) {
@@ -143,12 +143,12 @@ async function createPieChart(counts, totalProfiles) {
 
 // Run
 (async () => {
-  console.log('🚀 Starting NDJSON parsing...');
+  console.log('Starting NDJSON parsing...');
   const { counts, totalProfiles } = await processNDJSON(FILE_PATH);
 
-  console.log('🎨 Generating pie chart...');
+  console.log('Generating pie chart...');
   const image = await createPieChart(counts, totalProfiles);
 
   fs.writeFileSync(OUTPUT_PATH, image);
-  console.log(`✅ Pie chart saved to ${OUTPUT_PATH}`);
+  console.log(`Pie chart saved to ${OUTPUT_PATH}`);
 })();
